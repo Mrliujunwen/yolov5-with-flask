@@ -1,0 +1,10 @@
+
+
+path: data/mask # dataset root dir
+train: images/train  # train images (relative to 'path') 118287 images
+val: images/val  # val images (relative to 'path') 5000 images
+test: test-dev.txt
+
+
+nc: 2
+names: ['mask', 'no-mask']

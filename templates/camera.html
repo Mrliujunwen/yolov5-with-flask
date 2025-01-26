@@ -1,0 +1,208 @@
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>车牌识别检测系统</title>
+	<link rel="stylesheet" href="../static/bootstrap/css/bootstrap.min.css">
+	<link rel="stylesheet" href="../static/css/style.css">
+	<script src="../static/jquery/jquery-3.6.0.min.js"></script>
+	<script src="../static/echarts/echarts.min.js"></script>
+</head>
+
+<body>
+	<div class="container" style="background-color: rgb(243,243,243); max-width: 1284px; width: 1284px; padding: 0;">
+		<div class="row text-center">
+			<div class="col-md-12">
+				<h1>车牌识别检测系统</h1>
+			</div>
+		</div>
+		<div class="row text-center">
+			<div class="col-md-12">
+				<form action="#" method="post" enctype="multipart/form-data" id="image-form">
+					<div class="form-group">
+						<label for="camera">选择摄像头地址</label>
+						<input type="text" class=" form-control" id="camera" name="camera">
+					</div>
+					<button type="button" class="btn btn-success" id="start">开始 / 暂停</button>
+					<button type="button" class="btn btn-primary" disabled="disabled" id="stop">停止</button>
+					<button type="button" class="btn btn-primary" disabled="disabled" id="download">下载</button>
+					<a href="/index" class="btn btn-primary">图片检测</a>
+					<a href="/uploadVideo" class="btn btn-primary">视频检测</a>
+				</form>
+			</div>
+		</div>
+		<div class="col2">
+			<div class="col2-center-block">
+				<h2 class="text-center">预览</h2>
+				<div>
+					<img src="../static/images/bus.jpg" alt="" id="source">
+				</div>
+			</div>
+			<div class="col2-center-block">
+				<h2 class="text-center">结果</h2>
+				<div>
+					<img src="../static/images/zidane.jpg" alt="" id="predict">
+				</div>
+			</div>
+		</div>
+
+	</div>
+</body>
+<script>
+	$(() => {
+		// 显示结果数据
+
+		// 设置默认摄像头编号
+		$('#camera').val(0)
+			.change(() => {
+				$('#download').attr('videoName', $('#camera').val());
+			});
+
+		// 视频下载
+		$('#download').attr('videoName', '0')
+			.click(() => {
+				$.ajax({
+					url: '/download',
+					type: 'GET',
+					data: {
+						'fileName': $('#download').attr('videoName')
+					},
+					success: function (data) {
+						const a = document.createElement('a');
+						a.href = data.url;
+						a.download = 'predict.mp4';
+						a.click();
+					}
+				});
+			});
+
+		$('#stop').attr('stop', 'false')
+			.click(() => {
+				stop = $('#stop');
+				stop.attr('stop', 'true');
+				if ($('#start').attr('pause') === 'true') {
+					$.ajax({
+						url: '/videoPredict',
+						type: 'GET',
+						data: {
+							'videoName': $('#upload').attr('videoName'),
+							'isStop': stop.attr('stop')
+						},
+						success: (data) => {
+							// 检测完成
+							if (data.code === 1) {
+								$('#start')
+									.removeClass('btn-info')
+									.addClass('btn-success')
+									.removeAttr('disabled')
+									.attr('pause', 'true');
+								stop.attr('disabled', 'disabled')
+									.attr('stop', 'false');
+								$('#download').removeAttr('disabled');
+								$('#camera').removeAttr('disabled');
+
+
+
+								alert(data.msg);
+							}
+						}
+					});
+				}
+			});
+
+		$('#start').attr('pause', 'true')
+			.click(() => {
+				const start = $('#start');
+				const stop = $('#stop');
+				const download = $('#download');
+				const camera = $('#camera');
+				if (start.attr('pause') === 'true') {
+					start.attr('pause', 'false')
+						.removeClass('btn-success')
+						.addClass('btn-info');
+					stop.removeAttr('disabled');
+					download.attr('disabled', 'disabled');
+					camera.attr('disabled', 'disabled');
+
+
+				}
+				else {
+					start.attr('pause', 'true')
+						.removeClass('btn-info')
+						.addClass('btn-success');
+					stop.attr('stop', 'false');
+					download.removeAttr('disabled');
+					camera.attr('disabled', 'disabled');
+
+
+				}
+
+				function predictOneFrame() {
+					$.ajax({
+						url: '/videoPredict',
+						type: 'GET',
+						data: {
+							'videoName': download.attr('videoName'),
+							'isStop': stop.attr('stop')
+						},
+						success: (data) => {
+							// 检测失败
+							if (data.code === -1) {
+								start.attr('pause', 'true')
+									.removeClass('btn-info')
+									.addClass('btn-success');
+								stop.attr('disabled', 'disabled')
+									.attr('stop', 'false');
+								download.attr('disabled', 'disabled');
+								camera.removeAttr('disabled');
+
+
+
+								alert(data.msg);
+								return;
+							}
+							if (data.code === 1) {
+								start.attr('pause', 'true')
+									.removeClass('btn-info')
+									.addClass('btn-success');
+								stop.attr('disabled', 'disabled')
+									.attr('stop', 'false');
+								download.removeAttr('disabled');
+								camera.removeAttr('disabled');
+
+
+
+								alert(data.msg);
+								return;
+							}
+							stop.removeAttr('disabled');
+							download.attr('disabled', 'disabled');
+							const predictImg = data.predict;
+							const sourceImg = data.source;
+							const suffix = data.suffix;
+							// src=“data:image/png;base64,iVBORw0KGgoA
+							$('#predict').attr('src', `data:image/${suffix};base64,${predictImg}`);
+							$('#source').attr('src', `data:image/${suffix};base64,${sourceImg}`);
+
+
+
+							if (start.attr('pause') === 'true') {
+								download.removeAttr('disabled');
+								return;
+							}
+							predictOneFrame();
+						}
+					});
+				}
+
+				predictOneFrame();
+			});
+	});
+
+</script>
+
+</html>

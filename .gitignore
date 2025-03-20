@@ -1,0 +1,88 @@
+# Python相关
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# 虚拟环境
+venv/
+ENV/
+env/
+.env/
+
+# Flask相关
+instance/
+.webassets-cache
+flask_session/
+
+# 数据相关
+*.weights
+*.pt
+*.onnx
+*.mlmodel
+*.torchscript
+*.tflite
+*.h5
+runs/
+data/private/
+dataset/
+*.jpg
+*.jpeg
+*.png
+*.bmp
+*.tif
+*.tiff
+*.heic
+*.mp4
+*.mov
+*.avi
+*.MOV
+*.AVI
+
+# 编辑器/IDE相关
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# 日志相关
+*.log
+logs/
+wandb/
+
+# 系统相关
+.DS_Store
+Thumbs.db
+*.db
+
+# Docker相关
+.dockerignore
+Dockerfile
+docker-compose.yml
+
+# 其他
+.git/
+.github/
+test_images/
+predictions/
+detected_images/
+temp/
+tmp/ 
